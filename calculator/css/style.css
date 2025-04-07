@@ -1,0 +1,171 @@
+body {
+    background: #f2f2f2;
+    font-family: sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.calculator {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 320px;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.calculator.expanded {
+    width: 640px;
+}
+
+.display {
+    background: #222;
+    color: #fff;
+    padding: 20px;
+    text-align: right;
+}
+
+#history {
+    font-size: 14px;
+    color: #aaa;
+    min-height: 20px;
+}
+
+#output {
+    font-size: 32px;
+    min-height: 40px;
+}
+
+.main-area {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    flex: 1;
+}
+
+.btn {
+    padding: 20px;
+    font-size: 18px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn:hover {
+    background: #eee;
+}
+
+.operator {
+    background: #ffd000;
+}
+
+.equals {
+    background: #00b894;
+    color: white;
+}
+
+.zero {
+    grid-column: span 2;
+}
+
+.extra-buttons {
+    display: none;
+}
+
+.calculator.expanded .extra-buttons {
+    display: grid;
+}
+
+
+.expand-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    font-size: 16px;
+    background: #ddd;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.expand-btn:hover {
+    background: #ccc;
+}
+
+/* Converter panel */
+.converter {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+    width: 320px;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.converter h4 {
+    margin: 0;
+    font-size: 20px;
+    text-align: center;
+    color: #333;
+}
+
+.converter label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    color: #333;
+}
+
+.converter input,
+.converter select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+.converter button {
+    padding: 12px;
+    font-size: 16px;
+    background-color: #00b894;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.converter button:hover {
+    background-color: #019e7c;
+}
+
+.converter p {
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+    color: #333;
+}
+
+#convert-result {
+    color: #00b894;
+    font-size: 20px;
+}
