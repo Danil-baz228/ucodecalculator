@@ -1,82 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Calculator</title>
-    <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculator</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Play&display=swap" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 <div class="calculator" id="calculator">
+  <div class="top-container">
+    <button id="menu-btn">⚙</button>
+    <h1 class="header">Calculator</h1>
+  </div>
 
-    <select id="language-select" style="margin: 10px auto; display: block;">
+  <div id="menu" style="display: none;">
+    <div>
+      <label for="language-select">Language:</label>
+      <select id="language-select">
         <option value="en">English</option>
         <option value="uk">Українська</option>
-    </select>
+      </select>
+    </div>
+    <div>
+      <label for="mode-select">Mode:</label>
+      <select id="mode-select">
+        <option value="calc">Calculator</option>
+        <option value="conv">Converter</option>
+      </select>
+    </div>
+  </div>
 
+  <div class="calc" style="display: block;">
     <div class="display">
-        <div id="history"></div>
-        <div id="output">0</div>
+      <div id="history"></div>
+      <div id="output">0</div>
     </div>
-
+    
     <div class="main-area">
-        <div class="buttons basic-buttons">
-            <button class="btn" data-action="clear">C</button>
-            <button class="btn" data-action="sign">+/-</button>
-            <button class="btn" data-action="percent">%</button>
-            <button class="btn operator" data-action="/">/</button>
+      <div class="basic-buttons">
+        <button class="btn" data-action="clear">C</button>
+        <button class="btn" data-action="NO">⌫</button>
+        <button class="btn" data-action="percent">%</button>
+        <button class="btn" data-action="/">÷</button>
+    
+        <button class="btn" data-number="7">7</button>
+        <button class="btn" data-number="8">8</button>
+        <button class="btn" data-number="9">9</button>
+        <button class="btn" data-action="*">×</button>
+    
+        <button class="btn" data-number="4">4</button>
+        <button class="btn" data-number="5">5</button>
+        <button class="btn" data-number="6">6</button>
+        <button class="btn" data-action="-">−</button>
+    
+        <button class="btn" data-number="1">1</button>
+        <button class="btn" data-number="2">2</button>
+        <button class="btn" data-number="3">3</button>
+        <button class="btn" data-action="+">+</button>
+    
+        <button class="btn" data-action="sign">+/−</button>
+        <button class="btn" data-number="0">0</button>
+        <button class="btn" data-action="decimal">.</button>
+        <button class="btn" data-action="=">=</button>
+      </div>
+    
+      <div class="extra-buttons" id="extra-buttons">
+        <button class="btn" data-action="mr">MR</button>
+        <button class="btn" data-action="mc">MC</button>
+        <button class="btn" data-action="m+">M+</button>
+        <button class="btn" data-action="m-">M-</button>
 
-            <button class="btn" data-number="7">7</button>
-            <button class="btn" data-number="8">8</button>
-            <button class="btn" data-number="9">9</button>
-            <button class="btn operator" data-action="*">*</button>
+        <button class="btn" data-action="factorial">x!</button>
+        <button class="btn" data-action="power">xⁿ</button>
+        <button class="btn" data-action="sqrt">√x</button>
+        <button class="btn service" data-action="copy-history">📋 Copy</button>
+    
+        <button class="btn" data-action="to-binary">Bin</button>
+        <button class="btn" data-action="to-decimal">Dec</button>
+        <button class="btn" data-action="to-hex">Hex</button>
+        <button class="btn service" data-action="paste">📥 Paste</button>
+      </div>
+    </div>  
+    <button id="toggle-extra" class="expand-btn">Expand</button>
+  </div>
 
-            <button class="btn" data-number="4">4</button>
-            <button class="btn" data-number="5">5</button>
-            <button class="btn" data-number="6">6</button>
-            <button class="btn operator" data-action="-">-</button>
-
-            <button class="btn" data-number="1">1</button>
-            <button class="btn" data-number="2">2</button>
-            <button class="btn" data-number="3">3</button>
-            <button class="btn operator" data-action="+">+</button>
-
-            <button class="btn zero" data-number="0">0</button>
-            <button class="btn" data-action="decimal">.</button>
-            <button class="btn equals" data-action="=">=</button>
-        </div>
-
-        <div class="buttons extra-buttons" id="extra-buttons">
-            <button class="btn" data-action="factorial">x!</button>
-            <button class="btn" data-action="power">xⁿ</button>
-            <button class="btn" data-action="sqrt">√x</button>
-
-            <button class="btn" data-action="m+">M+</button>
-            <button class="btn" data-action="m-">M-</button>
-            <button class="btn" data-action="mr">MR</button>
-            <button class="btn" data-action="mc">MC</button>
-
-            <button class="btn" data-action="to-binary">Bin</button>
-            <button class="btn" data-action="to-decimal">Dec</button>
-            <button class="btn" data-action="to-hex">Hex</button>
-
-            <button class="btn" data-action="copy-history">📋 Copy</button>
-            <button class="btn" data-action="paste">📥 Paste</button>
-            <button class="btn" id="open-converter">🔁 Convert</button>
-        </div>
+  <div class="converter" id="converter-panel" style="display: none;">
+    <div>
+      <label for="convert-from" id="label-from">From:</label>
+      <select id="convert-from">
+        <option value="m">Meters</option>
+        <option value="cm">Centimeters</option>
+        <option value="km">Kilometers</option>
+        <option value="g">Grams</option>
+        <option value="kg">Kilograms</option>
+        <option value="t">Tonnes</option>
+        <option value="m2">m²</option>
+        <option value="cm2">cm²</option>
+        <option value="km2">km²</option>
+        <option value="ha">Hectares</option>
+      </select>
     </div>
 
-    <button id="toggle-extra" class="expand-btn">Expand</button>
-</div>
+    <div>
+      <input type="number" id="convert-value" />
+    </div>
 
-<div class="converter" id="converter-panel" style="display: none;">
-    <h4>Unit Converter</h4>
-
-    <label for="convert-value" id="label-value">Value:</label>
-    <input type="number" id="convert-value" />
-
-    <label for="convert-from" id="label-from">From:</label>
-    <select id="convert-from">
+    <div>
+      <label for="convert-to" id="label-to">To:</label>
+      <select id="convert-to">
         <option value="m">Meters</option>
         <option value="cm">Centimeters</option>
         <option value="km">Kilometers</option>
@@ -87,24 +119,12 @@
         <option value="cm2">cm²</option>
         <option value="km2">km²</option>
         <option value="ha">Hectares</option>
-    </select>
+      </select>
+    </div>
 
-    <label for="convert-to" id="label-to">To:</label>
-    <select id="convert-to">
-        <option value="m">Meters</option>
-        <option value="cm">Centimeters</option>
-        <option value="km">Kilometers</option>
-        <option value="g">Grams</option>
-        <option value="kg">Kilograms</option>
-        <option value="t">Tonnes</option>
-        <option value="m2">m²</option>
-        <option value="cm2">cm²</option>
-        <option value="km2">km²</option>
-        <option value="ha">Hectares</option>
-    </select>
-
+    <div id="convert-result"></div>
     <button onclick="convertUnits()" id="convert-btn">Convert</button>
-    <p><strong id="label-result">Result:</strong> <span id="convert-result">—</span></p>
+  </div>
 </div>
 
 <script src="js/script.js"></script>
