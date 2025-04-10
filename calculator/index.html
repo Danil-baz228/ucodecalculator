@@ -89,6 +89,7 @@
       <button class="measure-btn" value="length">Length</button>
       <button class="measure-btn" value="area">Area</button>
       <button class="measure-btn" value="numsys">Numeral system</button>
+      <button class="measure-btn" value="time">Time</button>
     </div>
 
     <div class="conv-area">
@@ -111,7 +112,10 @@
       </div>
 
       <div id="convert-result"></div>
-      <button onclick="convertUnits()" id="convert-btn">Convert</button>
+      <div class="conv-buttons">
+        <button onclick="convertUnits()" id="convert-btn" class="convert-btn">Convert</button>
+        <button onclick="swapUnits()" id="swap-btn" class="convert-btn">Swap</button>
+      </div>
     </div>
   </div>
 </div>

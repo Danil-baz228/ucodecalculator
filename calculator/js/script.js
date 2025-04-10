@@ -226,6 +226,8 @@ const toggleBtn = document.getElementById('toggle-extra');
 const measures = document.querySelectorAll('.measure-btn');
 const selectFrom = document.getElementById('convert-from');
 const selectTo = document.getElementById('convert-to');
+const convValue = document.getElementById('convert-value')
+const convRes = document.getElementById('convert-result');
 
 const unitsForMeasures = {
   weight: [
@@ -234,6 +236,7 @@ const unitsForMeasures = {
     '<option value="t"></option>'
   ],
   length: [
+    '<option value="mm"></option>',
     '<option value="cm"></option>',
     '<option value="m"></option>',
     '<option value="km"></option>'
@@ -247,7 +250,13 @@ const unitsForMeasures = {
   numsys: [
     '<option value="dec"></option>',
     '<option value="bin"></option>',
-    '<option value="hex"></option>',
+    '<option value="hex"></option>'
+  ],
+  time: [
+    '<option value="sec"></option>',
+    '<option value="min"></option>',
+    '<option value="hour"></option>',
+    '<option value="day"></option>'
   ]
 };
 
@@ -264,15 +273,20 @@ const translations = {
     from: 'From',
     to: 'To',
     convertBtn: 'Convert',
+    swapBtn: 'Swap',
     weight: 'Weight',
     length: 'Length',
     area: 'Area',
     numsys: 'Numeral system',
+    time: 'Time',
     nomeasure: 'Choose measure first',
+    invalidvalue: 'Invalid value',
+    unsupportedunits: 'Unsupported units',
     nounit: '—',
     g: 'Grams, g',
     kg: 'Kilograms, kg',
     t: 'Tonnes, t',
+    mm: 'Milimeters, mm',
     cm: 'Centimeters, cm',
     m: 'Meters, m',
     km: 'Kilometers, km',
@@ -282,7 +296,11 @@ const translations = {
     ha: 'Hectares, ha',
     dec: 'Decimal',
     bin: 'Binary',
-    hex: 'Hexadecimal'
+    hex: 'Hexadecimal',
+    sec: 'Seconds, s',
+    min: 'Minutes, min',
+    hour: 'Hours, hrs',
+    day: 'Days, d'
   },
   uk: {
     calculator: 'Калькулятор',
@@ -296,17 +314,22 @@ const translations = {
     from: 'З',
     to: 'До',
     convertBtn: 'Конвертувати',
+    swapBtn: 'Поміняти',
     weight: 'Вага',
     length: 'Довжина',
     area: 'Площа',
     numsys: 'Система числення',
+    time: 'Час',
     nomeasure: 'Оберіть спочатку міру',
+    invalidvalue: 'Невалідне значення',
+    unsupportedunits: 'Непідтримувані одиниці',
     nounit: '—',
     g: 'Грами, г',
     kg: 'Кілограми, кг',
     t: 'Тонни, т',
-    m: 'Метри, м',
+    mm: 'Міліметри, мм',
     cm: 'Сантиметри, см',
+    m: 'Метри, м',
     km: 'Кілометри, км',
     cm2: 'Квадратні сантиметри, см²',
     m2: 'Квадратні метри, м²',
@@ -314,7 +337,11 @@ const translations = {
     ha: 'Гектари, га',
     dec: 'Десяткова',
     bin: 'Двійкова',
-    hex: 'Шістнадцяткова'
+    hex: 'Шістнадцяткова',
+    sec: 'Секунди, с',
+    min: 'Хвилини, хв',
+    hour: 'Години, год',
+    day: 'Дні, дн'
   }
 };
 
@@ -345,18 +372,18 @@ measures.forEach(measure => {
 });
 
 function convertUnits() {
-  const resultEl = document.getElementById('convert-result');
   const measure = document.querySelector('.selected');
 
   if (!measure) {
-    resultEl.textContent = t.nomeasure;
+    convRes.textContent = t.nomeasure;
     return;
   }
   const from = selectFrom.value;
   const to = selectTo.value;
   const units = {
-    m: 1,
+    mm: 0.001,
     cm: 0.01,
+    m: 1,
     km: 1000,
     g: 0.001,
     kg: 1,
@@ -367,21 +394,24 @@ function convertUnits() {
     ha: 10_000,
     dec: 10,
     bin: 2,
-    hex: 16
+    hex: 16,
+    sec: 1,
+    min: 60,
+    hour: 60 * 60,
+    day: 60 * 60 * 24,
   };
 
   if (!units[from] || !units[to]) {
-    resultEl.textContent = 'Unsupported units';
+    convRes.textContent = t.unsupportedunits;
     return;
   }
-  let value = document.getElementById('convert-value').value
-    .trim().replace(',', '.');
+  let value = convValue.value.trim().replace(',', '.');
   let converted = value;
 
-  if (['weight', 'length', 'area'].includes(measure.value)) {
+  if (['weight', 'length', 'area', 'time'].includes(measure.value)) {
     value = value.match(/^\d+(\.\d+)?$/) ? parseFloat(value) : NaN;
     if (isNaN(value)) {
-      resultEl.textContent = 'Invalid value';
+      convRes.textContent = t.invalidvalue;
       return;
     }
     converted = (value * units[from]) / units[to];
@@ -396,15 +426,33 @@ function convertUnits() {
     value = parseInt(value, units[from]);
 
     if (isNaN(value)) {
-      resultEl.textContent = 'Invalid value';
+      convRes.textContent = t.invalidvalue;
       return;
     }
     converted = value.toString(units[to]);
   } else {
-    resultEl.textContent = t.nomeasure;
+    convRes.textContent = t.nomeasure;
     return;
   }
-  resultEl.textContent = `${converted}`;
+  convRes.textContent = `${converted}`;
+}
+
+function swapUnits() {
+  if (!document.querySelector('.selected')) {
+    convRes.textContent = t.nomeasure;
+    return;
+  }
+  [[selectFrom.value, selectTo.value]
+    = [selectTo.value, selectFrom.value]];
+
+  if (convValue.value && convRes.textContent
+    && !['nomeasure', 'unsupportedunits', 'invalidvalue']
+    .find(key => t[key] === convRes.textContent)) {
+  [[convValue.value, convRes.textContent]
+    = [convRes.textContent, convValue.value]];
+  } else {
+    convValue.value = '', convRes.textContent = '';
+  }
 }
 
 menuBtn.addEventListener('click', () => {
@@ -439,6 +487,9 @@ document.getElementById('lang-select').addEventListener('change', (e) => {
 });
 
 function changeLanguage(lang) {
+  let inv = ['nomeasure', 'unsupportedunits', 'invalidvalue']
+    .find(key => t[key] === convRes.textContent);
+
   currentLanguage = lang;
   t = translations[currentLanguage];
 
@@ -455,9 +506,13 @@ function changeLanguage(lang) {
   document.getElementById('label-from').textContent = t.from + ':';
   document.getElementById('label-to').textContent = t.to + ':';
   document.getElementById('convert-btn').textContent = t.convertBtn;
+  document.getElementById('swap-btn').textContent = t.swapBtn;
   measures.forEach(opt => opt.textContent = t[opt.value]);
   Array.from(selectFrom.options).forEach(opt => opt.textContent = t[opt.value]);
   Array.from(selectTo.options).forEach(opt => opt.textContent = t[opt.value]);
+
+  if (inv)
+    convRes.textContent = t[inv];
 }
 
 updateDisplay();

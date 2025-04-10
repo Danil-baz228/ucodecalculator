@@ -108,8 +108,8 @@ body {
 .btn,
 .expand-btn,
 select,
-.measure-btn,
-#convert-btn {
+.convert-btn,
+.measure-btn {
   background: #161f2f;
   border: 2px solid #161f2f;
   border-radius: 15px;
@@ -126,8 +126,8 @@ select,
 .btn:hover,
 select:hover,
 select:focus,
-#convert-btn:hover,
-.measure-btn:hover {
+.measure-btn:hover,
+.convert-btn:hover {
   background: #1c283b;
   border-radius: 15px;
   box-shadow:
@@ -145,13 +145,13 @@ select:focus,
 
 .basic-buttons .btn[data-action],
 .expand-btn,
-#convert-btn {
+.convert-btn {
   color: #c9a400;
 }
 
 .basic-buttons .btn[data-action]:hover,
 .expand-btn:hover,
-#convert-btn:hover,
+.convert-btn:hover,
 .measure-btn.selected {
   text-shadow: 0 0 1px #c9a400;
 }
@@ -164,9 +164,8 @@ select:focus,
   font-size: 15px;
 }
 
-.expand-btn,
-#convert-btn {
-  font-size: 18px;
+.expand-btn {
+  font-size: 16px;
   width: 100%;
   margin-top: 10px;
   padding: 10px;
@@ -266,4 +265,15 @@ select {
 #convert-value {
   margin: 10px 0;
   appearance: none;
+}
+
+.conv-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.convert-btn {
+  font-size: 16px;
+  padding: 10px;
+  width: 50%;
 }
