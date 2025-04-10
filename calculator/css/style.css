@@ -23,6 +23,7 @@ body {
     5px 15px 60px 1px #2b0060,
     inset 5px 5px 8px #2d264a;
   width: 320px;
+  min-height: 570px;
   transition: width 0.3s ease;
   overflow: hidden;
   margin: 15px;
@@ -107,6 +108,7 @@ body {
 .btn,
 .expand-btn,
 select,
+.measure-btn,
 #convert-btn {
   background: #161f2f;
   border: 2px solid #161f2f;
@@ -122,10 +124,10 @@ select,
 }
 
 .btn:hover,
-.expand-btn:hover,
 select:hover,
 select:focus,
-#convert-btn:hover {
+#convert-btn:hover,
+.measure-btn:hover {
   background: #1c283b;
   border-radius: 15px;
   box-shadow:
@@ -141,11 +143,16 @@ select:focus,
   width: 50px;
 }
 
-.basic-buttons .btn[data-action] {
+.basic-buttons .btn[data-action],
+.expand-btn,
+#convert-btn {
   color: #c9a400;
 }
 
-.basic-buttons .btn[data-action]:hover {
+.basic-buttons .btn[data-action]:hover,
+.expand-btn:hover,
+#convert-btn:hover,
+.measure-btn.selected {
   text-shadow: 0 0 1px #c9a400;
 }
 
@@ -157,8 +164,9 @@ select:focus,
   font-size: 15px;
 }
 
-.expand-btn {
-  font-size: 15px;
+.expand-btn,
+#convert-btn {
+  font-size: 18px;
   width: 100%;
   margin-top: 10px;
   padding: 10px;
@@ -169,7 +177,7 @@ select:focus,
   margin-bottom: 5px;
 }
 
-.header {
+#header {
   color: #c9a400;
   font-size: 32px;
   flex-grow: 1;
@@ -182,10 +190,12 @@ select:focus,
   border: none;
   color: #c9a400;
   font-size: 30px;
+  transition: transform 0.3s ease;
 }
 
 #menu-btn:hover {
   text-shadow: 0 0 1px #c9a400;
+  transform: rotate(45deg);
 }
 
 #menu {
@@ -199,13 +209,15 @@ select:focus,
   padding: 25px;
   position: absolute;
   left: 0;
-  top: 70px;
+  top: 65px;
 }
 
-#menu div,
-.converter div {
+.menu-item {
   margin: 10px 0;
   font-weight: bold;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 select {
@@ -215,27 +227,43 @@ select {
   background: transparent;
   color: white;
   font-size: 16px;
-  margin-left: 10px;
+  flex-grow: 1;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.converter {
+#conv {
   color: white;
   font-size: 18px;
 }
 
-#convert-btn {
+#measure-menu {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 10px 0 25px;
+}
+
+.measure-btn {
+  font-size: 16px;
+  height: 50px;
+}
+
+.measure-btn.selected {
   color: #c9a400;
-  font-size: 18px;
-  width: 100%;
 }
 
 #convert-value,
 #convert-result {
   border: none;
   font-size: 20px;
+  height: 65px;
   width: 100%;
-  height: 70px;
+  margin: 20px 0;
   outline: none;
+}
+
+#convert-value {
+  margin: 10px 0;
+  appearance: none;
 }

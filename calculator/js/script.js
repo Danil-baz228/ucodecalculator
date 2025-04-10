@@ -1,85 +1,31 @@
-const output = document.getElementById("output");
-const history = document.getElementById("history");
+const output = document.getElementById('output');
+const history = document.getElementById('history');
 
-let current = "0";
-let previous = "";
+let current = '0';
+let previous = '';
 let operator = null;
 let justEvaluated = false;
 let memory = 0;
 
-const translations = {
-  en: {
-    calculator: "Calculator",
-    lang: "Language",
-    mode: "Mode",
-    copy: "📋 Copy",
-    paste: "📥 Paste",
-    expand: "Expand",
-    collapse: "Collapse",
-    converterTitle: "Converter",
-    from: "From",
-    to: "To",
-    convertBtn: "Convert",
-    meters: "Meters",
-    centimeters: "Centimeters",
-    kilometers: "Kilometers",
-    grams: "Grams",
-    kilograms: "Kilograms",
-    tonnes: "Tonnes",
-    m: "Meters",
-    cm: "Centimeters",
-    km: "Kilometers",
-    g: "Grams",
-    kg: "Kilograms",
-    t: "Tonnes",
-    m2: "m²",
-    cm2: "cm²",
-    km2: "km²",
-    ha: "Hectares"
-  },
-  uk: {
-    calculator: "Калькулятор",
-    lang: "Мова",
-    mode: "Режим",
-    copy: "📋 Копіювати",
-    paste: "📥 Вставити",
-    expand: "Розгорнути",
-    collapse: "Згорнути",
-    converterTitle: "Конвертер",
-    from: "З",
-    to: "До",
-    convertBtn: "Конвертувати",
-    meters: "Метри",
-    centimeters: "Сантиметри",
-    kilometers: "Кілометри",
-    grams: "Грами",
-    kilograms: "Кілограми",
-    tonnes: "Тонни",
-    m: "Метри",
-    cm: "Сантиметри",
-    km: "Кілометри",
-    g: "Грами",
-    kg: "Кілограми",
-    t: "Тонни",
-    m2: "м²",
-    cm2: "см²",
-    km2: "км²",
-    ha: "Гектари"
-  }
-};
-
-let currentLanguage = "en";
-let currentMode = "calc";
-
 function updateDisplay() {
   output.textContent = current;
-  history.textContent = previous + (operator || "");
+  history.textContent = previous + (operator || '');
 }
 
 function clear() {
-  current = "0";
-  previous = "";
+  current = '0';
+  previous = '';
   operator = null;
+  updateDisplay();
+}
+
+function backspace() {
+  if (justEvaluated) {
+    current = '0';
+    justEvaluated = false;
+  } else {
+    current = current.length > 1 ? current.slice(0, -1) : '0';
+  }
   updateDisplay();
 }
 
@@ -88,14 +34,14 @@ function appendNumber(number) {
     current = number;
     justEvaluated = false;
   } else {
-    current = current === "0" ? number : current + number;
+    current = current === '0' ? number : current + number;
   }
   updateDisplay();
 }
 
 function addDecimal() {
-  if (!current.includes(".")) {
-    current += ".";
+  if (!current.includes('.')) {
+    current += '.';
   }
   updateDisplay();
 }
@@ -116,7 +62,7 @@ function chooseOperator(op) {
   }
   operator = op;
   previous = current;
-  current = "0";
+  current = '0';
   justEvaluated = false;
   updateDisplay();
 }
@@ -126,22 +72,22 @@ function evaluate() {
   let b = parseFloat(current);
   if (isNaN(a) || isNaN(b)) return;
 
-  if (operator === "power") {
+  if (operator === 'power') {
     evaluatePower();
     return;
   }
 
   let result = 0;
   switch (operator) {
-    case "+": result = a + b; break;
-    case "-": result = a - b; break;
-    case "*": result = a * b; break;
-    case "/": result = b !== 0 ? a / b : "Error"; break;
+    case '+': result = a + b; break;
+    case '-': result = a - b; break;
+    case '*': result = a * b; break;
+    case '/': result = b !== 0 ? a / b : 'Error'; break;
     default: return;
   }
 
   current = result.toString();
-  previous = "";
+  previous = '';
   operator = null;
   justEvaluated = true;
   updateDisplay();
@@ -150,7 +96,7 @@ function evaluate() {
 function factorial(n) {
   n = parseFloat(n);
   if (n < 0 || !Number.isInteger(n)) {
-    current = "Error";
+    current = 'Error';
   } else {
     let result = 1;
     for (let i = 2; i <= n; i++) {
@@ -163,8 +109,8 @@ function factorial(n) {
 
 function powerMode() {
   previous = current;
-  current = "0";
-  operator = "power";
+  current = '0';
+  operator = 'power';
   updateDisplay();
 }
 
@@ -174,7 +120,7 @@ function evaluatePower() {
   if (isNaN(base) || isNaN(exponent)) return;
 
   current = Math.pow(base, exponent).toString();
-  previous = "";
+  previous = '';
   operator = null;
   justEvaluated = true;
   updateDisplay();
@@ -182,7 +128,7 @@ function evaluatePower() {
 
 function squareRoot(n) {
   n = parseFloat(n);
-  current = n < 0 ? "Error" : Math.sqrt(n).toString();
+  current = n < 0 ? 'Error' : Math.sqrt(n).toString();
   updateDisplay();
 }
 
@@ -206,33 +152,10 @@ function memoryClear() {
   memory = 0;
 }
 
-function toBinary() {
-  const num = parseInt(current);
-  if (isNaN(num)) return;
-  current = num.toString(2);
-  justEvaluated = true;
-  updateDisplay();
-}
-
-function toDecimal() {
-  const result = parseInt(current, 16);
-  current = isNaN(result) ? "Error" : result.toString();
-  justEvaluated = true;
-  updateDisplay();
-}
-
-function toHex() {
-  const num = parseInt(current);
-  if (isNaN(num)) return;
-  current = num.toString(16).toUpperCase();
-  justEvaluated = true;
-  updateDisplay();
-}
-
 function copyHistory() {
   const text = `${history.textContent} ${output.textContent}`;
   navigator.clipboard.writeText(text).then(() => {
-    alert("Copied!");
+    alert('Copied!');
   });
 }
 
@@ -244,20 +167,167 @@ function pasteFromClipboard() {
       justEvaluated = true;
       updateDisplay();
     } else {
-      current = "Error";
+      current = 'Error';
       updateDisplay();
     }
   });
 }
 
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    const number = btn.dataset.number;
+    if (number !== undefined) appendNumber(number);
+    else if (action === 'clear') clear();
+    else if (action === 'backspace') backspace();
+    else if (action === 'decimal') addDecimal();
+    else if (action === 'sign') toggleSign();
+    else if (action === 'percent') percent();
+    else if (action === '=') evaluate();
+    else if (['+', '-', '*', '/'].includes(action)) chooseOperator(action);
+    else if (action === 'factorial') factorial(current);
+    else if (action === 'power') powerMode();
+    else if (action === 'sqrt') squareRoot(current);
+    else if (action === 'm+') memoryAdd();
+    else if (action === 'm-') memorySubtract();
+    else if (action === 'mr') memoryRecall();
+    else if (action === 'mc') memoryClear();
+    else if (action === 'copy-history') copyHistory();
+    else if (action === 'paste') pasteFromClipboard();
+  });
+});
+
+const calculator = document.getElementById('calculator');
+const header = document.getElementById('header');
+const menuBtn = document.getElementById('menu-btn');
+const toggleBtn = document.getElementById('toggle-extra');
+const measures = document.querySelectorAll('.measure-btn');
+const selectFrom = document.getElementById('convert-from');
+const selectTo = document.getElementById('convert-to');
+
+const unitsForMeasures = {
+  weight: [
+    '<option value="g"></option>',
+    '<option value="kg"></option>',
+    '<option value="t"></option>'
+  ],
+  length: [
+    '<option value="cm"></option>',
+    '<option value="m"></option>',
+    '<option value="km"></option>'
+  ],
+  area: [
+    '<option value="cm2"></option>',
+    '<option value="m2"></option>',
+    '<option value="km2"></option>',
+    '<option value="ha"></option>'
+  ],
+  nymsys: [
+    '<option value="dec"></option>',
+    '<option value="bin"></option>',
+    '<option value="hex"></option>',
+  ]
+};
+
+const translations = {
+  en: {
+    calculator: 'Calculator',
+    converter: 'Converter',
+    lang: 'Language',
+    mode: 'Mode',
+    copy: '📋 Copy',
+    paste: '📥 Paste',
+    expand: 'Expand',
+    collapse: 'Collapse',
+    from: 'From',
+    to: 'To',
+    convertBtn: 'Convert',
+    weight: 'Weight',
+    length: 'Length',
+    area: 'Area',
+    nymsys: 'Nymerical system',
+    nomeasure: 'Choose measure first',
+    g: 'Grams, g',
+    kg: 'Kilograms, kg',
+    t: 'Tonnes, t',
+    cm: 'Centimeters, cm',
+    m: 'Meters, m',
+    km: 'Kilometers, km',
+    cm2: 'Square centimeters, cm²',
+    m2: 'Square meters, m²',
+    km2: 'Square kilometers, km²',
+    ha: 'Hectares, ha',
+    dec: 'Decimal',
+    bin: 'Binary',
+    hex: 'Hexadecimal'
+  },
+  uk: {
+    calculator: 'Калькулятор',
+    converter: 'Конвертер',
+    lang: 'Мова',
+    mode: 'Режим',
+    copy: '📋 Копіювати',
+    paste: '📥 Вставити',
+    expand: 'Розгорнути',
+    collapse: 'Згорнути',
+    from: 'З',
+    to: 'До',
+    convertBtn: 'Конвертувати',
+    weight: 'Вага',
+    length: 'Довжина',
+    area: 'Площа',
+    nymsys: 'Система числення',
+    nomeasure: 'Оберіть спочатку міру',
+    g: 'Грами, г',
+    kg: 'Кілограми, кг',
+    t: 'Тонни, т',
+    m: 'Метри, м',
+    cm: 'Сантиметри, см',
+    km: 'Кілометри, км',
+    cm2: 'Квадратні сантиметри, см²',
+    m2: 'Квадратні метри, м²',
+    km2: 'Квадратні кілометри, км²',
+    ha: 'Гектари, га',
+    dec: 'Десяткова',
+    bin: 'Двійкова',
+    hex: 'Шістнадцяткова'
+  }
+};
+
+let currentLanguage = 'en';
+let currentMode = 'calc';
+let prevMeasure = null;
+let t = translations[currentLanguage];
+
+toggleBtn.addEventListener('click', () => {
+  calculator.classList.toggle('expanded');
+  toggleBtn.textContent = calculator.classList.contains('expanded')
+    ? t.collapse : t.expand;
+});
+
+measures.forEach(measure => {
+  measure.addEventListener('click', () => {
+    selectFrom.innerHTML = '';
+    selectFrom.innerHTML = unitsForMeasures[measure.value];
+    selectTo.innerHTML = '';
+    selectTo.innerHTML = unitsForMeasures[measure.value];
+    if (prevMeasure)
+      prevMeasure.classList.remove('selected');
+    measure.classList.add('selected');
+    prevMeasure = measure;
+    Array.from(selectFrom.options).forEach(opt => opt.textContent = t[opt.value]);
+    Array.from(selectTo.options).forEach(opt => opt.textContent = t[opt.value]);
+  });
+});
+
 function convertUnits() {
-  const value = parseFloat(document.getElementById("convert-value").value);
-  const from = document.getElementById("convert-from").value;
-  const to = document.getElementById("convert-to").value;
-  const resultEl = document.getElementById("convert-result");
+  const value = parseFloat(document.getElementById('convert-value').value);
+  const from = selectFrom.value;
+  const to = selectTo.value;
+  const resultEl = document.getElementById('convert-result');
 
   if (isNaN(value)) {
-    resultEl.textContent = "Invalid value";
+    resultEl.textContent = 'Invalid value';
     return;
   }
 
@@ -275,166 +345,90 @@ function convertUnits() {
   };
 
   if (!units[from] || !units[to]) {
-    resultEl.textContent = "Unsupported units";
+    resultEl.textContent = 'Unsupported units';
     return;
   }
 
   const base = value * units[from];
   const converted = base / units[to];
-  resultEl.textContent = `${converted} ${to}`;
+  resultEl.textContent = `${converted}`;
 }
 
-const unitGroups = {
-  length: ["m", "cm", "km"],
-  mass: ["g", "kg", "t"],
-  area: ["m2", "cm2", "km2", "ha"]
-};
-
-function getGroup(unit) {
-  for (const [group, units] of Object.entries(unitGroups)) {
-    if (units.includes(unit)) return group;
-  }
-  return null;
-}
-
-
-function backspace() {
-  if (justEvaluated) {
-    current = "0";
-    justEvaluated = false;
-  } else {
-    current = current.length > 1 ? current.slice(0, -1) : "0";
-  }
+function toBinary() {
+  const num = parseInt(current);
+  if (isNaN(num)) return;
+  current = num.toString(2);
+  justEvaluated = true;
   updateDisplay();
 }
 
-
-document.querySelectorAll(".btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const action = btn.dataset.action;
-    const number = btn.dataset.number;
-    if (number !== undefined) appendNumber(number);
-    else if (action === "clear") clear();
-    else if (action === "decimal") addDecimal();
-    else if (action === "sign") toggleSign();
-    else if (action === "percent") percent();
-    else if (action === "=") evaluate();
-    else if (["+", "-", "*", "/"].includes(action)) chooseOperator(action);
-    else if (action === "factorial") factorial(current);
-    else if (action === "power") powerMode();
-    else if (action === "sqrt") squareRoot(current);
-    else if (action === "m+") memoryAdd();
-    else if (action === "m-") memorySubtract();
-    else if (action === "mr") memoryRecall();
-    else if (action === "mc") memoryClear();
-    else if (action === "to-binary") toBinary();
-    else if (action === "to-decimal") toDecimal();
-    else if (action === "to-hex") toHex();
-    else if (action === "copy-history") copyHistory();
-    else if (action === "paste") pasteFromClipboard();
-    else if (action === "backspace") backspace();
-
-  });
-});
-
-document.getElementById("convert-from").addEventListener("change", () => {
-  const from = document.getElementById("convert-from").value;
-  const group = getGroup(from);
-  const toSelect = document.getElementById("convert-to");
-
-  const currentTo = toSelect.value;
-
-  toSelect.innerHTML = "";
-
-  if (group && unitGroups[group]) {
-    unitGroups[group].forEach(unit => {
-      const option = document.createElement("option");
-      option.value = unit;
-      option.textContent = translations[currentLanguage][unit];
-      toSelect.appendChild(option);
-    });
-
-
-    if (unitGroups[group].includes(currentTo)) {
-      toSelect.value = currentTo;
-    }
-  }
-});
-
-
-document.getElementById("menu-btn").addEventListener("click", () => {
-  const menu = document.getElementById("menu");
-
-  menu.style.display = menu.style.display === "none"
-    ? "block" : "none";
-});
-
-document.getElementById("mode-select").addEventListener("change", (e) => {
-  changeMode(e.target.value);
-});
-
-document.getElementById("toggle-extra").addEventListener("click", () => {
-  const calculator = document.getElementById("calculator");
-  calculator.classList.toggle("expanded");
-
-  const toggleBtn = document.getElementById("toggle-extra");
-  const t = translations[currentLanguage];
-  toggleBtn.textContent = calculator.classList.contains("expanded")
-      ? t.collapse
-      : t.expand;
-});
-
-
-function changeMode(mode) {
-  if (mode === "conv") {
-    currentMode = "conv";
-    document.querySelector('.header').textContent = "Converter";
-    document.querySelector('.converter').style.display = "block";
-    if (document.querySelector('.expanded')) {
-      document.getElementById("toggle-extra").click();
-    }
-    document.querySelector('.calc').style.display = "none";
-  } else {
-    currentMode = "calc";
-    document.querySelector('.header').textContent = "Calculator";
-    document.querySelector('.converter').style.display = "none";
-    document.querySelector('.calc').style.display = "block";
-  }
-  changeLanguage(currentLanguage);
+function toDecimal() {
+  const result = parseInt(current, 16);
+  current = isNaN(result) ? 'Error' : result.toString();
+  justEvaluated = true;
+  updateDisplay();
 }
 
-document.getElementById("language-select").addEventListener("change", (e) => {
+function toHex() {
+  const num = parseInt(current);
+  if (isNaN(num)) return;
+  current = num.toString(16).toUpperCase();
+  justEvaluated = true;
+  updateDisplay();
+}
+
+menuBtn.addEventListener('click', () => {
+  const menu = document.getElementById('menu');
+
+  menu.style.display = menu.style.display === 'none'
+    ? 'block' : 'none';
+});
+
+document.getElementById('mode-select').addEventListener('change', (e) => {
+  const conv = document.getElementById('conv');
+  const calc = document.getElementById('calc');
+
+  if (e.target.value === 'conv') {
+    currentMode = 'conv';
+    header.textContent = t.converter;
+    conv.style.display = 'block';
+    if (calculator.classList.contains('expanded'))
+      toggleBtn.click();
+    calc.style.display = 'none';
+  } else {
+    currentMode = 'calc';
+    header.textContent = t.calculator;
+    conv.style.display = 'none';
+    calc.style.display = 'block';
+  }
+  menuBtn.click();
+});
+
+document.getElementById('lang-select').addEventListener('change', (e) => {
   changeLanguage(e.target.value);
 });
 
 function changeLanguage(lang) {
   currentLanguage = lang;
-  const t = translations[lang];
+  t = translations[currentLanguage];
 
-  document.querySelector('.header').textContent
-    = currentMode === "calc" ? t.calculator : t.converterTitle;
-  document.querySelector('label[for="language-select"]').textContent = t.lang + ":";
-  document.querySelector('label[for="mode-select"]').textContent = t.mode + ":";
+  header.textContent = currentMode === 'calc' ? t.calculator : t.converter;
+  document.querySelector('label[for="lang-select"]').textContent = t.lang + ':';
+  document.querySelector('label[for="mode-select"]').textContent = t.mode + ':';
   document.querySelector('option[value="calc"]').textContent = t.calculator;
-  document.querySelector('option[value="conv"]').textContent = t.converterTitle;
+  document.querySelector('option[value="conv"]').textContent = t.converter;
   document.querySelector('[data-action="copy-history"]').textContent = t.copy;
   document.querySelector('[data-action="paste"]').textContent = t.paste;
+  toggleBtn.textContent = calculator.classList.contains('expanded')
+    ? t.collapse : t.expand;
 
-  const toggleBtn = document.getElementById("toggle-extra");
-  toggleBtn.textContent = document.getElementById("calculator").classList.contains("expanded")
-    ? t.collapse
-    : t.expand;
-
-  document.getElementById("label-from").textContent = t.from + ":";
-  document.getElementById("label-to").textContent = t.to + ":";
-  document.getElementById("convert-btn").textContent = t.convertBtn;
-
-  const fromSelect = document.getElementById("convert-from");
-  const toSelect = document.getElementById("convert-to");
-
-  Array.from(fromSelect.options).forEach(opt => opt.textContent = t[opt.value]);
-  Array.from(toSelect.options).forEach(opt => opt.textContent = t[opt.value]);
+  document.getElementById('label-from').textContent = t.from + ':';
+  document.getElementById('label-to').textContent = t.to + ':';
+  document.getElementById('convert-btn').textContent = t.convertBtn;
+  measures.forEach(opt => opt.textContent = t[opt.value]);
+  Array.from(selectFrom.options).forEach(opt => opt.textContent = t[opt.value]);
+  Array.from(selectTo.options).forEach(opt => opt.textContent = t[opt.value]);
 }
 
 updateDisplay();
-changeLanguage("en");
+changeLanguage(currentLanguage);
