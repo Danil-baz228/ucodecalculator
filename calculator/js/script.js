@@ -284,7 +284,31 @@ function convertUnits() {
   resultEl.textContent = `${converted} ${to}`;
 }
 
-// Handle all button clicks
+const unitGroups = {
+  length: ["m", "cm", "km"],
+  mass: ["g", "kg", "t"],
+  area: ["m2", "cm2", "km2", "ha"]
+};
+
+function getGroup(unit) {
+  for (const [group, units] of Object.entries(unitGroups)) {
+    if (units.includes(unit)) return group;
+  }
+  return null;
+}
+
+
+function backspace() {
+  if (justEvaluated) {
+    current = "0";
+    justEvaluated = false;
+  } else {
+    current = current.length > 1 ? current.slice(0, -1) : "0";
+  }
+  updateDisplay();
+}
+
+
 document.querySelectorAll(".btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const action = btn.dataset.action;
@@ -308,17 +332,35 @@ document.querySelectorAll(".btn").forEach(btn => {
     else if (action === "to-hex") toHex();
     else if (action === "copy-history") copyHistory();
     else if (action === "paste") pasteFromClipboard();
+    else if (action === "backspace") backspace();
+
   });
 });
 
-document.getElementById("toggle-extra").addEventListener("click", () => {
-  const calculator = document.getElementById("calculator");
-  calculator.classList.toggle("expanded");
+document.getElementById("convert-from").addEventListener("change", () => {
+  const from = document.getElementById("convert-from").value;
+  const group = getGroup(from);
+  const toSelect = document.getElementById("convert-to");
 
-  const toggleBtn = document.getElementById("toggle-extra");
-  const t = translations[currentLanguage];
-  toggleBtn.textContent = calculator.classList.contains("expanded") ? t.collapse : t.expand;
+  const currentTo = toSelect.value;
+
+  toSelect.innerHTML = "";
+
+  if (group && unitGroups[group]) {
+    unitGroups[group].forEach(unit => {
+      const option = document.createElement("option");
+      option.value = unit;
+      option.textContent = translations[currentLanguage][unit];
+      toSelect.appendChild(option);
+    });
+
+
+    if (unitGroups[group].includes(currentTo)) {
+      toSelect.value = currentTo;
+    }
+  }
 });
+
 
 document.getElementById("menu-btn").addEventListener("click", () => {
   const menu = document.getElementById("menu");
