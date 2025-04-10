@@ -222,7 +222,7 @@ const unitsForMeasures = {
     '<option value="km2"></option>',
     '<option value="ha"></option>'
   ],
-  nymsys: [
+  numsys: [
     '<option value="dec"></option>',
     '<option value="bin"></option>',
     '<option value="hex"></option>',
@@ -245,8 +245,9 @@ const translations = {
     weight: 'Weight',
     length: 'Length',
     area: 'Area',
-    nymsys: 'Nymerical system',
+    numsys: 'Numeral system',
     nomeasure: 'Choose measure first',
+    nounit: '—',
     g: 'Grams, g',
     kg: 'Kilograms, kg',
     t: 'Tonnes, t',
@@ -276,8 +277,9 @@ const translations = {
     weight: 'Вага',
     length: 'Довжина',
     area: 'Площа',
-    nymsys: 'Система числення',
+    numsys: 'Система числення',
     nomeasure: 'Оберіть спочатку міру',
+    nounit: '—',
     g: 'Грами, г',
     kg: 'Кілограми, кг',
     t: 'Тонни, т',
@@ -321,16 +323,15 @@ measures.forEach(measure => {
 });
 
 function convertUnits() {
-  const value = parseFloat(document.getElementById('convert-value').value);
-  const from = selectFrom.value;
-  const to = selectTo.value;
   const resultEl = document.getElementById('convert-result');
+  const measure = document.querySelector('.selected');
 
-  if (isNaN(value)) {
-    resultEl.textContent = 'Invalid value';
+  if (!measure) {
+    resultEl.textContent = t.nomeasure;
     return;
   }
-
+  const from = selectFrom.value;
+  const to = selectTo.value;
   const units = {
     m: 1,
     cm: 0.01,
@@ -341,40 +342,47 @@ function convertUnits() {
     m2: 1,
     cm2: 0.0001,
     km2: 1_000_000,
-    ha: 10_000
+    ha: 10_000,
+    dec: 10,
+    bin: 2,
+    hex: 16
   };
 
   if (!units[from] || !units[to]) {
     resultEl.textContent = 'Unsupported units';
     return;
   }
+  let value = document.getElementById('convert-value').value
+    .trim().replace(',', '.');
+  let converted = value;
 
-  const base = value * units[from];
-  const converted = base / units[to];
+  if (['weight', 'length', 'area'].includes(measure.value)) {
+    value = value.match(/^\d+(\.\d+)?$/) ? parseFloat(value) : NaN;
+    if (isNaN(value)) {
+      resultEl.textContent = 'Invalid value';
+      return;
+    }
+    converted = (value * units[from]) / units[to];
+  } else if (measure.value === 'numsys') {
+    if (from === 'dec' && !value.match(/^[+-]?\d+$/)) {
+      value = NaN;
+    } else if (from === 'bin' && !value.match(/^[+-]?[01]+$/)) {
+      value = NaN;
+    } else if (from === 'hex' && !value.match(/^[+-]?[a-f\d]+$/i)) {
+      value = NaN;
+    }
+    value = parseInt(value, units[from]);
+
+    if (isNaN(value)) {
+      resultEl.textContent = 'Invalid value';
+      return;
+    }
+    converted = value.toString(units[to]);
+  } else {
+    resultEl.textContent = t.nomeasure;
+    return;
+  }
   resultEl.textContent = `${converted}`;
-}
-
-function toBinary() {
-  const num = parseInt(current);
-  if (isNaN(num)) return;
-  current = num.toString(2);
-  justEvaluated = true;
-  updateDisplay();
-}
-
-function toDecimal() {
-  const result = parseInt(current, 16);
-  current = isNaN(result) ? 'Error' : result.toString();
-  justEvaluated = true;
-  updateDisplay();
-}
-
-function toHex() {
-  const num = parseInt(current);
-  if (isNaN(num)) return;
-  current = num.toString(16).toUpperCase();
-  justEvaluated = true;
-  updateDisplay();
 }
 
 menuBtn.addEventListener('click', () => {

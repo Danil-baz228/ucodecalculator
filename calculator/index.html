@@ -88,25 +88,25 @@
       <button class="measure-btn" value="weight">Weight</button>
       <button class="measure-btn" value="length">Length</button>
       <button class="measure-btn" value="area">Area</button>
-      <button class="measure-btn" value="nymsys">Nymerical system</button>
+      <button class="measure-btn" value="numsys">Numeral system</button>
     </div>
 
     <div class="conv-area">
       <div  class="menu-item">
         <label for="convert-from" id="label-from">From:</label>
         <select id="convert-from">
-          <option value="nomeasure">Choose measure first</option>
+          <option value="nounit">—</option>
         </select>
       </div>
 
       <div>
-        <input id="convert-value">
+        <input id="convert-value" autocomplete="off">
       </div>
 
       <div class="menu-item">
         <label for="convert-to" id="label-to">To:</label>
         <select id="convert-to">
-          <option value="nomeasure">Choose measure first</option>
+          <option value="nounit">—</option>
         </select>
       </div>
 
