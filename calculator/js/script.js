@@ -373,6 +373,18 @@ document.getElementById("mode-select").addEventListener("change", (e) => {
   changeMode(e.target.value);
 });
 
+document.getElementById("toggle-extra").addEventListener("click", () => {
+  const calculator = document.getElementById("calculator");
+  calculator.classList.toggle("expanded");
+
+  const toggleBtn = document.getElementById("toggle-extra");
+  const t = translations[currentLanguage];
+  toggleBtn.textContent = calculator.classList.contains("expanded")
+      ? t.collapse
+      : t.expand;
+});
+
+
 function changeMode(mode) {
   if (mode === "conv") {
     currentMode = "conv";
