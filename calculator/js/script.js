@@ -6,16 +6,24 @@ let previous = '';
 let operator = null;
 let justEvaluated = false;
 let memory = 0;
+let expressionHistory = '';
 
 function updateDisplay() {
-  output.textContent = current;
-  history.textContent = previous + (operator || '');
+  const num = parseFloat(current);
+  output.textContent = !isNaN(num) && isFinite(num)
+      ? Number(num).toLocaleString()
+      : current;
+
+  if (!justEvaluated) {
+    history.textContent = expressionHistory;
+  }
 }
 
 function clear() {
   current = '0';
   previous = '';
   operator = null;
+  expressionHistory = '';
   updateDisplay();
 }
 
@@ -32,12 +40,14 @@ function backspace() {
 function appendNumber(number) {
   if (justEvaluated) {
     current = number;
+    expressionHistory = '';
     justEvaluated = false;
   } else {
     current = current === '0' ? number : current + number;
   }
   updateDisplay();
 }
+
 
 function addDecimal() {
   if (!current.includes('.')) {
@@ -57,39 +67,42 @@ function percent() {
 }
 
 function chooseOperator(op) {
-  if (previous && operator && !justEvaluated) {
-    evaluate();
+  if (justEvaluated) {
+    expressionHistory = current;
+    justEvaluated = false;
+  } else {
+    expressionHistory += (expressionHistory ? ' ' : '') + current;
   }
+
   operator = op;
   previous = current;
   current = '0';
-  justEvaluated = false;
+
+  expressionHistory += ` ${op}`;
   updateDisplay();
 }
 
 function evaluate() {
-  let a = parseFloat(previous);
-  let b = parseFloat(current);
-  if (isNaN(a) || isNaN(b)) return;
-
   if (operator === 'power') {
     evaluatePower();
     return;
   }
 
-  let result = 0;
-  switch (operator) {
-    case '+': result = a + b; break;
-    case '-': result = a - b; break;
-    case '*': result = a * b; break;
-    case '/': result = b !== 0 ? a / b : 'Error'; break;
-    default: return;
+  expressionHistory += ` ${current}`;
+  history.textContent = expressionHistory + ' =';
+
+  try {
+    const safeExpression = expressionHistory.replace(/[^0-9+\-*/(). ]/g, '');
+    const result = eval(safeExpression);
+    current = result.toString();
+  } catch (e) {
+    current = 'Error';
   }
 
-  current = result.toString();
   previous = '';
   operator = null;
   justEvaluated = true;
+
   updateDisplay();
 }
 
@@ -118,6 +131,9 @@ function evaluatePower() {
   const base = parseFloat(previous);
   const exponent = parseFloat(current);
   if (isNaN(base) || isNaN(exponent)) return;
+
+  expressionHistory = `${base} ^ ${exponent}`;
+  history.textContent = expressionHistory + ' =';
 
   current = Math.pow(base, exponent).toString();
   previous = '';
@@ -153,7 +169,13 @@ function memoryClear() {
 }
 
 function copyHistory() {
-  const text = `${history.textContent} ${output.textContent}`;
+  let text;
+  if (justEvaluated) {
+    text = history.textContent + ' ' + output.textContent;
+  } else {
+    text = expressionHistory + ' ' + current;
+  }
+
   navigator.clipboard.writeText(text).then(() => {
     alert('Copied!');
   });
