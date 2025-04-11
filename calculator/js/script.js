@@ -5,14 +5,115 @@ let current = '0';
 let previous = '';
 let operator = null;
 let justEvaluated = false;
-let memory = 0;
+let newNum = true;
 let expressionHistory = '';
+let memory = 0;
+
+const translations = {
+  en: {
+    calculator: 'Calculator',
+    converter: 'Converter',
+    lang: 'Language',
+    mode: 'Mode',
+    copy: '📋 Copy',
+    paste: '📥 Paste',
+    expand: 'Expand',
+    collapse: 'Collapse',
+    clipboard: 'Copied to clipboard!',
+    from: 'From',
+    to: 'To',
+    convertBtn: 'Convert',
+    swapBtn: 'Swap',
+    weight: 'Weight',
+    length: 'Length',
+    area: 'Area',
+    numsys: 'Numeral system',
+    time: 'Time',
+    nomeasure: 'Choose measure first',
+    invalidvalue: 'Invalid value',
+    unsupportedunits: 'Unsupported units',
+    nounit: '—',
+    g: 'Grams, g',
+    kg: 'Kilograms, kg',
+    t: 'Tonnes, t',
+    mm: 'Milimeters, mm',
+    cm: 'Centimeters, cm',
+    m: 'Meters, m',
+    km: 'Kilometers, km',
+    cm2: 'Square centimeters, cm²',
+    m2: 'Square meters, m²',
+    km2: 'Square kilometers, km²',
+    ha: 'Hectares, ha',
+    dec: 'Decimal',
+    bin: 'Binary',
+    hex: 'Hexadecimal',
+    sec: 'Seconds, s',
+    min: 'Minutes, min',
+    hour: 'Hours, hrs',
+    day: 'Days, d'
+  },
+  uk: {
+    calculator: 'Калькулятор',
+    converter: 'Конвертер',
+    lang: 'Мова',
+    mode: 'Режим',
+    copy: '📋 Копіювати',
+    paste: '📥 Вставити',
+    expand: 'Розгорнути',
+    collapse: 'Згорнути',
+    clipboard: 'Скопійовано в буфер обміну!',
+    from: 'З',
+    to: 'До',
+    convertBtn: 'Конвертувати',
+    swapBtn: 'Поміняти',
+    weight: 'Вага',
+    length: 'Довжина',
+    area: 'Площа',
+    numsys: 'Система числення',
+    time: 'Час',
+    nomeasure: 'Оберіть спочатку міру',
+    invalidvalue: 'Невалідне значення',
+    unsupportedunits: 'Непідтримувані одиниці',
+    nounit: '—',
+    g: 'Грами, г',
+    kg: 'Кілограми, кг',
+    t: 'Тонни, т',
+    mm: 'Міліметри, мм',
+    cm: 'Сантиметри, см',
+    m: 'Метри, м',
+    km: 'Кілометри, км',
+    cm2: 'Квадратні сантиметри, см²',
+    m2: 'Квадратні метри, м²',
+    km2: 'Квадратні кілометри, км²',
+    ha: 'Гектари, га',
+    dec: 'Десяткова',
+    bin: 'Двійкова',
+    hex: 'Шістнадцяткова',
+    sec: 'Секунди, с',
+    min: 'Хвилини, хв',
+    hour: 'Години, год',
+    day: 'Дні, дн'
+  }
+};
+
+let currentLanguage = 'en';
+let currentMode = 'calc';
+let prevMeasure = null;
+let t = translations[currentLanguage];
 
 function updateDisplay() {
   const num = parseFloat(current);
-  output.textContent = !isNaN(num) && isFinite(num)
-      ? Number(num).toLocaleString()
-      : current;
+
+  if (!isFinite(num)) {
+    output.textContent = current;
+  } else {
+    let dec_d = current.split('.')[1];
+
+    output.textContent
+      = num.toLocaleString(undefined,
+        { minimumFractionDigits: dec_d ? dec_d.length : 0 })
+        + (current[current.length - 1] === '.' ? '.' : '');
+  }
 
   if (!justEvaluated) {
     history.textContent = expressionHistory;
@@ -24,30 +125,36 @@ function clear() {
   previous = '';
   operator = null;
   expressionHistory = '';
+  justEvaluated = false;
   updateDisplay();
 }
 
 function backspace() {
   if (justEvaluated) {
-    current = '0';
-    justEvaluated = false;
+    clear();
   } else {
-    current = current.length > 1 ? current.slice(0, -1) : '0';
+    if (current.length > 1) {
+      current = current.slice(0, -1);
+    } else {
+      current = '0';
+      newNum = false;
+    }
+    updateDisplay();
   }
-  updateDisplay();
 }
 
 function appendNumber(number) {
+  newNum = true;
   if (justEvaluated) {
     current = number;
     expressionHistory = '';
     justEvaluated = false;
   } else {
-    current = current === '0' ? number : current + number;
+    if (current.match(/\d/g).length < 15)
+      current = current === '0' ? number : current + number;
   }
   updateDisplay();
 }
-
 
 function addDecimal() {
   if (!current.includes('.')) {
@@ -67,6 +174,7 @@ function percent() {
 }
 
 function chooseOperator(op) {
+  newNum = false;
   if (justEvaluated) {
     expressionHistory = current;
     justEvaluated = false;
@@ -83,27 +191,28 @@ function chooseOperator(op) {
 }
 
 function evaluate() {
-  if (operator === 'power') {
-    evaluatePower();
-    return;
+  if (!justEvaluated) {
+    if (operator === 'power') {
+      evaluatePower();
+      return;
+    }
+
+    expressionHistory += ` ${current}`;
+    history.textContent = expressionHistory + ' =';
+
+    try {
+      const safeExpression = expressionHistory.replace(/[^0-9+\-*/(). ]/g, '');
+      const result = eval(safeExpression);
+      current = result.toString();
+    } catch (e) {
+      current = 'Error';
+    }
+
+    previous = '';
+    operator = null;
+    justEvaluated = true;
+    updateDisplay();
   }
-
-  expressionHistory += ` ${current}`;
-  history.textContent = expressionHistory + ' =';
-
-  try {
-    const safeExpression = expressionHistory.replace(/[^0-9+\-*/(). ]/g, '');
-    const result = eval(safeExpression);
-    current = result.toString();
-  } catch (e) {
-    current = 'Error';
-  }
-
-  previous = '';
-  operator = null;
-  justEvaluated = true;
-
-  updateDisplay();
 }
 
 function factorial(n) {
@@ -169,37 +278,43 @@ function memoryClear() {
 }
 
 function copyHistory() {
-  let text;
+  let text = '';
+
   if (justEvaluated) {
     text = history.textContent + ' ' + output.textContent;
-  } else {
+  } else if (!expressionHistory) {
+    text = current;
+  } else if (newNum) {
     text = expressionHistory + ' ' + current;
+  } else {
+    text = expressionHistory.slice(0, -2);
   }
 
   navigator.clipboard.writeText(text).then(() => {
-    alert('Copied!');
+    alert(t.clipboard);
   });
 }
 
 function pasteFromClipboard() {
   navigator.clipboard.readText().then(text => {
-    const clean = text.match(/[0-9.\-]+/);
+    const clean = text.match(/[+-]?\d+(\.\d+)?/);
+
     if (clean) {
       current = clean[0];
       justEvaluated = true;
-      updateDisplay();
     } else {
       current = 'Error';
-      updateDisplay();
     }
+    updateDisplay();
   });
 }
 
 document.querySelectorAll('.btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const action = btn.dataset.action;
     const number = btn.dataset.number;
-    if (number !== undefined) appendNumber(number);
+    const action = btn.dataset.action;
+
+    if (number) appendNumber(number);
     else if (action === 'clear') clear();
     else if (action === 'backspace') backspace();
     else if (action === 'decimal') addDecimal();
@@ -259,96 +374,6 @@ const unitsForMeasures = {
     '<option value="day"></option>'
   ]
 };
-
-const translations = {
-  en: {
-    calculator: 'Calculator',
-    converter: 'Converter',
-    lang: 'Language',
-    mode: 'Mode',
-    copy: '📋 Copy',
-    paste: '📥 Paste',
-    expand: 'Expand',
-    collapse: 'Collapse',
-    from: 'From',
-    to: 'To',
-    convertBtn: 'Convert',
-    swapBtn: 'Swap',
-    weight: 'Weight',
-    length: 'Length',
-    area: 'Area',
-    numsys: 'Numeral system',
-    time: 'Time',
-    nomeasure: 'Choose measure first',
-    invalidvalue: 'Invalid value',
-    unsupportedunits: 'Unsupported units',
-    nounit: '—',
-    g: 'Grams, g',
-    kg: 'Kilograms, kg',
-    t: 'Tonnes, t',
-    mm: 'Milimeters, mm',
-    cm: 'Centimeters, cm',
-    m: 'Meters, m',
-    km: 'Kilometers, km',
-    cm2: 'Square centimeters, cm²',
-    m2: 'Square meters, m²',
-    km2: 'Square kilometers, km²',
-    ha: 'Hectares, ha',
-    dec: 'Decimal',
-    bin: 'Binary',
-    hex: 'Hexadecimal',
-    sec: 'Seconds, s',
-    min: 'Minutes, min',
-    hour: 'Hours, hrs',
-    day: 'Days, d'
-  },
-  uk: {
-    calculator: 'Калькулятор',
-    converter: 'Конвертер',
-    lang: 'Мова',
-    mode: 'Режим',
-    copy: '📋 Копіювати',
-    paste: '📥 Вставити',
-    expand: 'Розгорнути',
-    collapse: 'Згорнути',
-    from: 'З',
-    to: 'До',
-    convertBtn: 'Конвертувати',
-    swapBtn: 'Поміняти',
-    weight: 'Вага',
-    length: 'Довжина',
-    area: 'Площа',
-    numsys: 'Система числення',
-    time: 'Час',
-    nomeasure: 'Оберіть спочатку міру',
-    invalidvalue: 'Невалідне значення',
-    unsupportedunits: 'Непідтримувані одиниці',
-    nounit: '—',
-    g: 'Грами, г',
-    kg: 'Кілограми, кг',
-    t: 'Тонни, т',
-    mm: 'Міліметри, мм',
-    cm: 'Сантиметри, см',
-    m: 'Метри, м',
-    km: 'Кілометри, км',
-    cm2: 'Квадратні сантиметри, см²',
-    m2: 'Квадратні метри, м²',
-    km2: 'Квадратні кілометри, км²',
-    ha: 'Гектари, га',
-    dec: 'Десяткова',
-    bin: 'Двійкова',
-    hex: 'Шістнадцяткова',
-    sec: 'Секунди, с',
-    min: 'Хвилини, хв',
-    hour: 'Години, год',
-    day: 'Дні, дн'
-  }
-};
-
-let currentLanguage = 'en';
-let currentMode = 'calc';
-let prevMeasure = null;
-let t = translations[currentLanguage];
 
 toggleBtn.addEventListener('click', () => {
   calculator.classList.toggle('expanded');
