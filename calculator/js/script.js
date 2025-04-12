@@ -20,6 +20,8 @@ const translations = {
     expand: 'Expand',
     collapse: 'Collapse',
     clipboard: 'Copied to clipboard!',
+    zerodivision: 'Division by zero',
+    error: 'Error',
     from: 'From',
     to: 'To',
     convertBtn: 'Convert',
@@ -62,6 +64,8 @@ const translations = {
     expand: 'Розгорнути',
     collapse: 'Згорнути',
     clipboard: 'Скопійовано в буфер обміну!',
+    zerodivision: 'Ділення на нуль',
+    error: 'Помилка',
     from: 'З',
     to: 'До',
     convertBtn: 'Конвертувати',
@@ -174,30 +178,49 @@ function percent() {
 }
 
 function chooseOperator(op) {
-  newNum = false;
-  if (justEvaluated) {
-    expressionHistory = current;
-    justEvaluated = false;
+  if (expressionHistory.slice(-1) === '/' && current === '0') {
+    clear();
+    current = t.zerodivision;
   } else {
-    expressionHistory += (expressionHistory ? ' ' : '') + current;
+    if (current[current.length - 1] === '.')
+      current = current.slice(0, -1);
+    if (justEvaluated) {
+      expressionHistory = current;
+      justEvaluated = false;
+    } else {
+      if (!expressionHistory) {
+        expressionHistory = current;
+      } else if (!newNum) {
+        expressionHistory = expressionHistory.slice(0, -2);
+      } else {
+        expressionHistory += ' ' + current;
+      }
+    }
+    expressionHistory += ` ${op}`;
+    current = '0';
+    newNum = false;
+  
+    operator = op;
+    previous = current;
   }
-
-  operator = op;
-  previous = current;
-  current = '0';
-
-  expressionHistory += ` ${op}`;
   updateDisplay();
 }
 
 function evaluate() {
-  if (!justEvaluated) {
+  if (expressionHistory.slice(-1) === '/' && current === '0') {
+    clear();
+    current = t.zerodivision;
+  } else if (!justEvaluated) {
     if (operator === 'power') {
       evaluatePower();
       return;
     }
 
-    expressionHistory += ` ${current}`;
+    if (newNum) {
+      expressionHistory += (expressionHistory ? ' ' : '') + current;
+    } else {
+      expressionHistory = expressionHistory.slice(0, -2);
+    }
     history.textContent = expressionHistory + ' =';
 
     try {
@@ -205,25 +228,26 @@ function evaluate() {
       const result = eval(safeExpression);
       current = result.toString();
     } catch (e) {
-      current = 'Error';
+      current = t.error;
     }
-
-    previous = '';
-    operator = null;
     justEvaluated = true;
-    updateDisplay();
+
+    operator = null;
+    previous = '';
   }
+  updateDisplay();
 }
 
-function factorial(n) {
+function fact(n) {
   n = parseFloat(n);
+
   if (n < 0 || !Number.isInteger(n)) {
-    current = 'Error';
+    current = t.error;
   } else {
     let result = 1;
-    for (let i = 2; i <= n; i++) {
+
+    for (let i = 2; i <= n; i++)
       result *= i;
-    }
     current = result.toString();
   }
   updateDisplay();
@@ -253,7 +277,7 @@ function evaluatePower() {
 
 function squareRoot(n) {
   n = parseFloat(n);
-  current = n < 0 ? 'Error' : Math.sqrt(n).toString();
+  current = n < 0 ? t.error : Math.sqrt(n).toString();
   updateDisplay();
 }
 
@@ -303,7 +327,7 @@ function pasteFromClipboard() {
       current = clean[0];
       justEvaluated = true;
     } else {
-      current = 'Error';
+      current = t.error;
     }
     updateDisplay();
   });
@@ -314,6 +338,8 @@ document.querySelectorAll('.btn').forEach(btn => {
     const number = btn.dataset.number;
     const action = btn.dataset.action;
 
+    if (isNaN(current))
+      clear();
     if (number) appendNumber(number);
     else if (action === 'clear') clear();
     else if (action === 'backspace') backspace();
@@ -322,7 +348,7 @@ document.querySelectorAll('.btn').forEach(btn => {
     else if (action === 'percent') percent();
     else if (action === '=') evaluate();
     else if (['+', '-', '*', '/'].includes(action)) chooseOperator(action);
-    else if (action === 'factorial') factorial(current);
+    else if (action === 'factorial') fact(current);
     else if (action === 'power') powerMode();
     else if (action === 'sqrt') squareRoot(current);
     else if (action === 'm+') memoryAdd();
@@ -512,7 +538,9 @@ document.getElementById('lang-select').addEventListener('change', (e) => {
 });
 
 function changeLanguage(lang) {
-  let inv = ['nomeasure', 'unsupportedunits', 'invalidvalue']
+  let invCalc = ['zerodivision', 'error']
+    .find(key => t[key] === output.textContent);
+  let invConv = ['nomeasure', 'unsupportedunits', 'invalidvalue']
     .find(key => t[key] === convRes.textContent);
 
   currentLanguage = lang;
@@ -536,8 +564,10 @@ function changeLanguage(lang) {
   Array.from(selectFrom.options).forEach(opt => opt.textContent = t[opt.value]);
   Array.from(selectTo.options).forEach(opt => opt.textContent = t[opt.value]);
 
-  if (inv)
-    convRes.textContent = t[inv];
+  if (invCalc)
+    output.textContent = t[invCalc];
+  if (invConv)
+    convRes.textContent = t[invConv];
 }
 
 updateDisplay();

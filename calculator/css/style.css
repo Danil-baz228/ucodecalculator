@@ -35,7 +35,7 @@ body {
 }
 
 .calculator.expanded {
-  width: 750px;
+  width: 680px;
 }
 
 .display,
@@ -86,7 +86,7 @@ body {
 
 .calculator.expanded .extra-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   place-items: stretch;
 }
