@@ -35,7 +35,7 @@ body {
 }
 
 .calculator.expanded {
-  width: 680px;
+  width: 720px;
 }
 
 .display,
@@ -70,7 +70,7 @@ body {
 }
 
 .calculator.expanded .main-area {
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 1.2fr;
 }
 
 .basic-buttons {
@@ -86,9 +86,21 @@ body {
 
 .calculator.expanded .extra-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 10px;
   place-items: stretch;
+}
+
+.btn.math {
+  grid-area: 1 / span 4;
+}
+
+.btn.mr {
+  grid-area: 2 / span 3;
+}
+
+.btn.service {
+  grid-area: 3 / span 6;
 }
 
 @media only screen and (max-width: 775px) {
@@ -109,7 +121,8 @@ body {
 .expand-btn,
 select,
 .convert-btn,
-.measure-btn {
+.measure-btn,
+.service {
   background: #161f2f;
   border: 2px solid #161f2f;
   border-radius: 15px;
@@ -127,7 +140,9 @@ select,
 select:hover,
 select:focus,
 .measure-btn:hover,
-.convert-btn:hover {
+.convert-btn:hover,
+.expand-btn:hover,
+.service:hover {
   background: #1c283b;
   border-radius: 15px;
   box-shadow:
@@ -145,14 +160,16 @@ select:focus,
 
 .basic-buttons .btn[data-action],
 .expand-btn,
-.convert-btn {
+.convert-btn,
+.service {
   color: #c9a400;
 }
 
 .basic-buttons .btn[data-action]:hover,
 .expand-btn:hover,
 .convert-btn:hover,
-.measure-btn.selected {
+.measure-btn.selected,
+.service:hover {
   text-shadow: 0 0 1px #c9a400;
 }
 

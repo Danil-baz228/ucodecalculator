@@ -118,10 +118,7 @@ function updateDisplay() {
         { minimumFractionDigits: dec_d ? dec_d.length : 0 })
         + (current[current.length - 1] === '.' ? '.' : '');
   }
-
-  if (!justEvaluated) {
-    history.textContent = expressionHistory;
-  }
+  history.textContent = expressionHistory;
 }
 
 function clear() {
@@ -129,7 +126,6 @@ function clear() {
   previous = '';
   operator = null;
   expressionHistory = '';
-  justEvaluated = false;
   updateDisplay();
 }
 
@@ -178,122 +174,183 @@ function percent() {
 }
 
 function chooseOperator(op) {
-  if (expressionHistory.slice(-1) === '/' && current === '0') {
+  if (expressionHistory.slice(-1) === '/'
+    && newNum && current === '0') {
     clear();
     current = t.zerodivision;
   } else {
-    if (current[current.length - 1] === '.')
-      current = current.slice(0, -1);
-    if (justEvaluated) {
-      expressionHistory = current;
-      justEvaluated = false;
-    } else {
-      if (!expressionHistory) {
+    if (operator === 'pow') {
+      expressionHistory
+        = expressionHistory.replace('?', newNum ? current : '1');
+    } else if (!['fact', 'sqrt'].includes(operator)) {
+      if (current[current.length - 1] === '.')
+        current = current.slice(0, -1);
+      if (justEvaluated) {
         expressionHistory = current;
-      } else if (!newNum) {
-        expressionHistory = expressionHistory.slice(0, -2);
+        justEvaluated = false;
       } else {
-        expressionHistory += ' ' + current;
+        if (!expressionHistory) {
+          expressionHistory = current;
+        } else if (!newNum) {
+          expressionHistory = expressionHistory.slice(0, -2);
+        } else {
+          expressionHistory += ' ' + current;
+        }
       }
     }
     expressionHistory += ` ${op}`;
     current = '0';
     newNum = false;
-  
     operator = op;
-    previous = current;
-  }
-  updateDisplay();
-}
-
-function evaluate() {
-  if (expressionHistory.slice(-1) === '/' && current === '0') {
-    clear();
-    current = t.zerodivision;
-  } else if (!justEvaluated) {
-    if (operator === 'power') {
-      evaluatePower();
-      return;
-    }
-
-    if (newNum) {
-      expressionHistory += (expressionHistory ? ' ' : '') + current;
-    } else {
-      expressionHistory = expressionHistory.slice(0, -2);
-    }
-    history.textContent = expressionHistory + ' =';
-
-    try {
-      const safeExpression = expressionHistory.replace(/[^0-9+\-*/(). ]/g, '');
-      const result = eval(safeExpression);
-      current = result.toString();
-    } catch (e) {
-      current = t.error;
-    }
-    justEvaluated = true;
-
-    operator = null;
-    previous = '';
   }
   updateDisplay();
 }
 
 function fact(n) {
-  n = parseFloat(n);
+  let result = 1;
 
-  if (n < 0 || !Number.isInteger(n)) {
-    current = t.error;
+  for (let i = 2; i <= n; i++)
+    result *= i;
+  return result;
+}
+
+function sqrt(n) {
+  return Math.sqrt(n);
+}
+
+function pow(base, exponent) {
+  return Math.pow(base, exponent);
+}
+
+const extra = {fact, sqrt, pow};
+
+function chooseExtraOperator(op) {
+  let num = parseFloat(current);
+
+  if (justEvaluated) {
+    expressionHistory = '';
+    justEvaluated = false;
+    newNum = true;
+  }
+  if (newNum && op === 'pow') {
+    if (operator !== `${op}`
+      && !['fact', 'sqrt'].includes(operator)) {
+      expressionHistory += (expressionHistory ? ' ' : '')
+        + `${op}(${current}, ?)`;
+    } else {
+      expressionHistory = expressionHistory.substring(0,
+        expressionHistory.lastIndexOf(`${operator}`)) + `${op}(${current}, ?)`;
+    }
+  }
+  else if (newNum && Number.isInteger(num) && num >= 0) {
+    if (operator !== `${op}`
+      && !['fact', 'sqrt', 'pow'].includes(operator)) {
+      expressionHistory += (expressionHistory ? ' ' : '')
+        + `${op}(${current})`;
+    } else {
+      expressionHistory = expressionHistory.substring(0,
+        expressionHistory.lastIndexOf(`${operator}`)) + `${op}(${current})`;
+    }
+  } else if (['fact', 'sqrt', 'pow'].includes(operator)) {
+    current = previous;
+    expressionHistory = expressionHistory.substring(0,
+      expressionHistory.lastIndexOf(`${operator}`))
+        + (op === 'pow' ? `${op}(${current}, ?)` : `${op}(${current})`);
   } else {
-    let result = 1;
+    alert(t.error);
+    return;
+  }
+  previous = current;
+  current = '0';
+  newNum = false;
+  operator = op;
+  updateDisplay();
+}
 
-    for (let i = 2; i <= n; i++)
-      result *= i;
-    current = result.toString();
+function evaluate() {
+  if (expressionHistory.slice(-1) === '/'
+    && newNum && current === '0') {
+    clear();
+    current = t.zerodivision;
+  } else if (!justEvaluated) {
+    if (operator === 'pow') {
+      expressionHistory
+        = expressionHistory.replace('?', newNum ? current : '1');
+    } else if (!['fact', 'sqrt'].includes(operator)) {
+      if (newNum) {
+        expressionHistory += (expressionHistory ? ' ' : '') + current;
+      } else {
+        expressionHistory = expressionHistory.slice(0, -2);
+      }
+    }
+
+    let hist = expressionHistory.replace(/, /g, ',').split(' ');
+    let tmp = [];
+
+    for (let i = 0; i < hist.length; i++)
+      hist[i] = compute(hist[i]);
+    for (let i = 0; i < hist.length; i++) {
+      if (hist[i] === '*') {
+        hist[i - 1] = hist[i - 1] * hist[i + 1];
+        hist[i + 1] = hist[i - 1];
+        tmp.push(hist[i - 1]);
+      } else if (hist[i] === '/') {
+        hist[i - 1] = hist[i - 1] / hist[i + 1];
+        hist[i + 1] = hist[i - 1];
+        tmp.push(hist[i - 1]);
+      } else if (hist[i - 1] !== '*' && hist[i + 1] !== '*'
+        && hist[i - 1] !== '/' && hist[i + 1] !== '/') {
+        tmp.push(hist[i]);
+      }
+    }
+    for (let i = 1; i < tmp.length - 1; i++) {
+      if (tmp[i] === '+') {
+        tmp[i - 1] = tmp[i - 1] + tmp[i + 1];
+        tmp[i + 1] = tmp[i - 1];
+      } else if (tmp[i] === '-') {
+        tmp[i - 1] = tmp[i - 1] - tmp[i + 1];
+        tmp[i + 1] = tmp[i - 1];
+      }
+    }
+    current = tmp[tmp.length - 1].toString();
+    justEvaluated = true;
+    operator = null;
+    expressionHistory += ' =';
   }
   updateDisplay();
 }
 
-function powerMode() {
-  previous = current;
-  current = '0';
-  operator = 'power';
-  updateDisplay();
-}
+function compute(el) {
+  if (!isNaN(el))
+    return parseFloat(el);
+  else if (['+', '-', '*', '/'].includes(el))
+    return el;
+  const func = el.slice(0, el.indexOf('('));
+  let arg = el.slice(el.indexOf('(') + 1, el.indexOf(')'));
 
-function evaluatePower() {
-  const base = parseFloat(previous);
-  const exponent = parseFloat(current);
-  if (isNaN(base) || isNaN(exponent)) return;
-
-  expressionHistory = `${base} ^ ${exponent}`;
-  history.textContent = expressionHistory + ' =';
-
-  current = Math.pow(base, exponent).toString();
-  previous = '';
-  operator = null;
-  justEvaluated = true;
-  updateDisplay();
-}
-
-function squareRoot(n) {
-  n = parseFloat(n);
-  current = n < 0 ? t.error : Math.sqrt(n).toString();
-  updateDisplay();
+  if (func !== 'pow') {
+    return extra[func](parseFloat(arg));
+  } else {
+    arg = arg.split(',');
+    return extra[func](parseFloat(arg[0]), parseFloat(arg[1]));
+  }
 }
 
 function memoryAdd() {
   memory += parseFloat(current);
-  justEvaluated = true;
 }
 
 function memorySubtract() {
   memory -= parseFloat(current);
-  justEvaluated = true;
 }
 
 function memoryRecall() {
+  if (justEvaluated) {
+    clear();
+    justEvaluated = false;
+  }
   current = memory.toString();
-  justEvaluated = true;
+  newNum = true;
   updateDisplay();
 }
 
@@ -308,6 +365,10 @@ function copyHistory() {
     text = history.textContent + ' ' + output.textContent;
   } else if (!expressionHistory) {
     text = current;
+  } else if (['fact', 'sqrt'].includes(operator)) {
+    text = expressionHistory;
+  } else if (operator === 'pow') {
+    text = expressionHistory.replace('?', newNum ? current : '1');
   } else if (newNum) {
     text = expressionHistory + ' ' + current;
   } else {
@@ -320,14 +381,42 @@ function copyHistory() {
 }
 
 function pasteFromClipboard() {
+  clear();
+  justEvaluated = false;
   navigator.clipboard.readText().then(text => {
-    const clean = text.match(/[+-]?\d+(\.\d+)?/);
+    let hist = text.replace(/, /g, ',').split(' ');
 
-    if (clean) {
-      current = clean[0];
-      justEvaluated = true;
+    for (let i = 0; i < hist.length; i++) {
+      if (!/^([+-]?\d+(\.\d+)?|[-+*/])$/.test(hist[i])
+        && !/^(fact\(\d+\)|sqrt\(\d+\))$/.test(hist[i])
+        && !/^pow\([+-]?\d+(\.\d+)?,[+-]?\d+(\.\d+)?\)$/.test(hist[i])) {
+        current = t.error;
+        updateDisplay();
+        return;
+      }
+    }
+    let last = hist[hist.length - 1].replace(',', ', ');
+
+    if (['+', '-', '*', '/'].includes(hist[0]))
+      hist.unshift('0');
+    text = hist.slice(0, -1).join(' ').replace(',', ', ');
+    expressionHistory = text;
+    if (!isNaN(last)) {
+      current = last;
+      newNum = true;
+    } else if (['+', '-', '*', '/'].includes(last)) {
+      expressionHistory += (expressionHistory ? ' ' : '') + last;
+      current = '0';
+      newNum = false;
     } else {
-      current = t.error;
+      expressionHistory += (expressionHistory ? ' ' : '') + last;
+      current = '0';
+      newNum = false;
+      operator = last.substring(0, last.indexOf('('));
+      previous = last.slice(last.indexOf('(') + 1, last.indexOf(')'));
+      if (operator === 'pow') {
+        previous = previous.split(',')[0];
+      }
     }
     updateDisplay();
   });
@@ -348,9 +437,7 @@ document.querySelectorAll('.btn').forEach(btn => {
     else if (action === 'percent') percent();
     else if (action === '=') evaluate();
     else if (['+', '-', '*', '/'].includes(action)) chooseOperator(action);
-    else if (action === 'factorial') fact(current);
-    else if (action === 'power') powerMode();
-    else if (action === 'sqrt') squareRoot(current);
+    else if (['fact', 'sqrt', 'pow'].includes(action)) chooseExtraOperator(action);
     else if (action === 'm+') memoryAdd();
     else if (action === 'm-') memorySubtract();
     else if (action === 'mr') memoryRecall();
